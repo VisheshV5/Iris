@@ -1,0 +1,5 @@
+IrisCompanion.xcodeproj/
+.build/
+DerivedData/
+Sources/Info.plist
+Sources/IrisCompanion.entitlements

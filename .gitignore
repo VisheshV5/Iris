@@ -1,0 +1,11 @@
+node_modules/
+.env
+vapi.state.json
+.DS_Store
+
+# Xcode
+ios/IrisCompanion/IrisCompanion.xcodeproj/
+ios/IrisCompanion/Sources/Info.plist
+ios/IrisCompanion/Sources/IrisCompanion.entitlements
+DerivedData/
+*.xcuserstate

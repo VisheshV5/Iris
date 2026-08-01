@@ -1,0 +1,82 @@
+name: IrisCompanion
+options:
+  bundleIdPrefix: com.iris.hackathon
+  deploymentTarget:
+    # @Observable (Observation framework) needs 17+; the DAT SDK itself is a 2026
+    # preview build unlikely to see real-world use on anything older anyway.
+    iOS: "17.0"
+  createIntermediateGroups: true
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: 2.54.0
+  MetaWearablesDAT:
+    url: https://github.com/facebook/meta-wearables-dat-ios
+    from: 0.8.0
+targets:
+  IrisCompanion:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+    info:
+      path: Sources/Info.plist
+      properties:
+        CFBundleDisplayName: Iris
+        CFBundleURLTypes:
+          - CFBundleTypeRole: Editor
+            CFBundleURLName: $(PRODUCT_BUNDLE_IDENTIFIER)
+            CFBundleURLSchemes: [iriscompanion]
+        # Required block for Meta Wearables Device Access Toolkit apps.
+        MWDAT:
+          AppLinkURLScheme: "iriscompanion://"
+          MetaAppID: $(META_APP_ID)
+          ClientToken: $(CLIENT_TOKEN)
+          TeamID: $(DEVELOPMENT_TEAM)
+          Analytics:
+            OptOut: true
+        # `audio` keeps the "Hey Iris" wake-word listener alive with the screen locked.
+        UIBackgroundModes: [processing, bluetooth-central, bluetooth-peripheral, audio]
+        NSMicrophoneUsageDescription: "Iris listens for 'Hey Iris' so you can give her instructions hands-free through your glasses. Audio is only processed to detect the wake phrase and your command."
+        NSSpeechRecognitionUsageDescription: "Your voice commands are transcribed so Iris can act on them."
+        NSBluetoothAlwaysUsageDescription: "Iris needs Bluetooth to connect to your Meta glasses."
+        NSLocalNetworkUsageDescription: "This lets your phone find and connect to your glasses over Wi-Fi."
+        NSBonjourServices: [_bonjour._tcp]
+        NSUserNotificationsUsageDescription: "Iris alerts you the instant a call comes in so you can decide whether to take it yourself."
+        NSContactsUsageDescription: "When you ask Iris to call someone by name, she looks up that one contact's phone number on this device. Only the single contact you confirm is shared — never your address book."
+        NSLocationWhenInUseUsageDescription: "Iris uses your approximate city, looked up once, to find nearby businesses and pick the right timezone for bookings. She never tracks your location."
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+    entitlements:
+      path: Sources/IrisCompanion.entitlements
+      properties:
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)$(CFBundleIdentifier)
+    settings:
+      base:
+        # Manual signing pinned to the recovered profile: the free Apple team hit its
+        # device-registration cap, so automatic signing (which phones home) fails even
+        # though this device is already in the profile. Valid until 2026-08-07.
+        CODE_SIGN_STYLE: Manual
+        DEVELOPMENT_TEAM: TJC25K879X
+        CODE_SIGN_IDENTITY: "Apple Development"
+        PROVISIONING_PROFILE_SPECIFIER: "iOS Team Provisioning Profile: com.iris.hackathon.IrisCompanion"
+        # Swift 5 mode: Swift 6's strict-concurrency runtime isolation checks fire
+        # inside Apple's audio/Speech callbacks (EXC_BREAKPOINT / dispatch_assert_queue).
+        SWIFT_VERSION: "5.0"
+        # Blank in Developer Mode (Meta AI app > App Info > tap version 5x > enable
+        # Developer Mode). Only fill these from the Wearables Developer Center if
+        # you later register a real org and want to distribute past 100 testers.
+        META_APP_ID: ""
+        CLIENT_TOKEN: ""
+    dependencies:
+      - package: Supabase
+        product: Supabase
+      - package: MetaWearablesDAT
+        product: MWDATCore
+      - package: MetaWearablesDAT
+        product: MWDATDisplay
+      - package: MetaWearablesDAT
+        product: MWDATMockDevice
