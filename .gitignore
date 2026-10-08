@@ -2,6 +2,7 @@ node_modules/
 .env
 vapi.state.json
 .DS_Store
+*.log
 
 # Xcode
 ios/IrisCompanion/IrisCompanion.xcodeproj/
